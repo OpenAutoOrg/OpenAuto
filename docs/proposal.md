@@ -139,7 +139,7 @@ How it works (Zero Greenfield Plumbing Risk · Fully Adaptable Stack):
 ```
 
 ### Why Constrained Assembly Beats "Raw Code Generation"
-- **Zero Hallucinated Code Risk:** AI selects from a curated catalog of certified, tested action modules rather than writing unconstrained Python scripts against the ERP.
+- **No Free-Form Code Generation:** AI selects from a curated catalog of certified, tested action modules rather than writing unconstrained Python scripts against the ERP.
 - **Enterprise Guardrails:** Read-only by default for analytical bots; write operations require explicit RBAC permissions and parameter schema validation.
 - **Fast Human Review:** Users review clean visual inputs, schedules, and recipients—not raw lines of code.
 
@@ -172,12 +172,12 @@ How it works (Zero Greenfield Plumbing Risk · Fully Adaptable Stack):
 - **Bot A: B2B Quote Request Extractor & Draft Generator (Event-Driven · High Value)**
   - *Why it's fast to demo:* Inbound email arrives with a contractor PDF $\rightarrow$ AI instantly extracts line items and matches ERP SKUs $\rightarrow$ Generates a ready-to-review Quote PDF. Demo takes **20 seconds** to show tangible value.
   - *Why it's not too difficult:* Read-only catalog matching and draft PDF generation (`pdfplumber` / Claude API + `reportlab`); sales reps retain 100% control via 1-click approval.
-  - *Outcome:* Shrinks quote turnaround from 12+ minutes to 4 minutes review, defending B2B sales without complex ERP writeback integration.
+  - *Outcome:* Cuts handling time from ~12 minutes to ~4 minutes of review per quote (assumption A4, validated in pilot), defending B2B sales without complex ERP writeback integration.
 
 - **Bot B: Morning Safety-Stock Shortage Alert (Scheduled · Quick Win)**
   - *Why it's fast to demo:* Assembled live in **3–5 minutes** using the **AI Chat Builder** by typing a natural-language prompt $\rightarrow$ Instant test run executes and sends an Excel alert.
   - *Why it's not too difficult:* Read-only threshold check on core fast-moving materials (structural timber, cement, drywall) using simple logic (`stock < min_safety_buffer`) and automated email dispatch (`openpyxl`).
-  - *Outcome:* Eliminates manual morning inventory counting across 80 stores; alerts trade desks before contractor morning rush.
+  - *Outcome:* Replaces the manual morning stock-report check in 80 stores with exception-only alerts (~15 → ~5 min per store), so trade desks can arrange inter-branch transfers before the contractor morning rush. It does not replace physical stock counts.
 
 | In Scope (Indicative Pilot Phase) | Out of Scope (Roadmap) |
 |---|---|
@@ -217,8 +217,8 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 
 | Retail Task | What AI Automates | Enterprise Safeguard & Quality Control | Business Accuracy |
 |---|---|---|---|
-| **Contractor Order Extraction** | Reads messy PDF quote requests, scans, handwritten notes, and email bodies | Dual-pass OCR/IDP with token-level confidence scoring; scores <85% automatically escalate to human review | **>98% accuracy** on validated schemas; zero silent hallucination |
-| **Catalog SKU Disambiguation** | Maps contractor slang / trade descriptions to exact ERP product numbers | Semantic vector matching; presents top-3 ranked matches with confidence scores for operator sign-off | Eliminates wrong-item shipments |
+| **Contractor Order Extraction** | Reads messy PDF quote requests, scans, handwritten notes, and email bodies | Dual-pass OCR/IDP with confidence scoring; fields scoring <85% are routed to human review | Target **≥95% field accuracy** (pilot gate); ≥70% of lines touchless |
+| **Catalog SKU Disambiguation** | Maps contractor slang / trade descriptions to exact ERP product numbers | Semantic vector matching; presents top-3 ranked matches with confidence scores for operator sign-off | Reduces wrong-item orders (target −50% errors) |
 | **Multilingual Routing & Drafts** | Sorts customer inquiries across Danish, Norwegian, and Swedish inboxes | Strict intent classification; drafts localized responses for sales team review during pilot | Human review before any email dispatch |
 | **Stockout Exception Detection** | Evaluates multi-store inventory trends against velocity thresholds | Deterministic business rules verify AI anomaly flags prior to report generation | Prevents false alarms to store managers |
 
@@ -233,36 +233,51 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 
 ## Slide 8 — Business impact & ROI
 
-**Key message:** Over €640k/year in direct labor savings in Denmark alone across the two MVP bots, yielding an estimated pilot payback period of under 4 months while actively defending B2B sales revenue.
+**Key message:** Once rolled out across Denmark, the two bots free ~14,000 staff hours a year — about **€570k net annual value** after running costs — so the ~€140k pilot pays back in roughly 3 months. Faster quotes add revenue upside on top, which we deliberately keep out of the base case.
 
-### Bottom-Up Financial Return (Primary Market / Denmark Working Scenario)
-
-| Metric | Bot A: B2B Quote Processor | Bot B: Store Shortage Alert | Combined Pilot Impact |
+### Key Assumptions (validated in Weeks 1–2 discovery)
+| # | Assumption | Value | Basis |
 |---|---|---|---|
-| **Daily Operational Volume** | 400 contractor quote requests / day | 80 stores evaluated daily at 06:00 | **480 automated cycles / day** |
-| **Baseline Manual Effort** | 12 min / quote *(APQC Benchmark)* | 15 min / store morning inventory review | ~100 hours manual re-typing / day |
-| **Effort with Open Auto** | 4 min / quote (review & confirm only) | 0 min manual work (exception-only alerts) | ~26 hours review time / day |
-| **Net Time Saved Annually** | 11,733 hours / year (220 business days) | 4,400 hours / year (275 retail operating days) | **16,133 hours freed / year** |
-| **Direct Labor Value (€40/hr)** | **€470k / year** | **€176k / year** | **€646k / year** direct savings |
+| A1 | Stores in Denmark | 80 | Assumption: "hundreds of stores" across 3 markets; Denmark is the home market |
+| A2 | B2B quote requests in Denmark | 400 / day (5 per store) | Assumption |
+| A3 | Share arriving as email / PDF (in scope for Bot A) | 75% → 300 / day | Assumption: phone and counter requests are excluded |
+| A4 | Manual handling time per quote → with Bot A | 12 min → 4 min (review only) | Assumption; to be time-studied on a sample of real quotes |
+| A5 | Morning shortage check per store → with Bot B | 15 min → 5 min (exception review) | Assumption |
+| A6 | Working days per year | 250 office days / 300 store days | Denmark: 5- vs. 6-day weeks, minus public holidays |
+| A7 | Fully loaded labour cost | €50 / hour | Eurostat: Denmark average €51.7/h (2025), rounded down |
 
-### Commercial & Strategic Uplift (Beyond Labor Hours)
-- **B2B Revenue Acceleration:** Cutting quote turnaround from 4–24 hours down to <15 minutes dramatically increases win rates on competitive contractor tenders (industry data indicates a 2–4% conversion lift, worth €200k–€500k in gross margin).
-- **Keystroke Error Elimination:** Re-keying error rates drop from 1.5–3.0% *(Gartner B2B benchmark)* to <0.2%, eliminating costly return logistics, re-stocking fees, and contractor disputes.
-- **Stockout Prevention:** Automated early-morning shortage alerts allow inter-branch transfers before contractor morning rushes, protecting retail sales.
+### Base Case: Denmark Full Rollout (Annual)
+| | Bot A: B2B Quote Drafts | Bot B: Shortage Alerts | Total |
+|---|---|---|---|
+| Volume | 300 quotes/day × 250 days | 80 stores × 300 days | |
+| Time saved | 8 min × 300 = 40 h/day → **10,000 h** | 10 min × 80 = 13.3 h/day → **4,000 h** | **14,000 h** |
+| Gross capacity value (€50/h) | €500k | €200k | **€700k** |
 
-### Pilot Investment vs. Payback
-- **Estimated Indicative Pilot Cost (~12–14 Weeks):** **€130k – €150k** (accelerator deployment, ERP integration adapters, 2 bots, and pilot change management).
-- **Payback Period:** **< 4 months** post-pilot rollout based on pilot market labor savings alone.
-- **Pilot-First Baseline Rule:** Weeks 1–2 discovery will measure exact local baselines (quote volume, handling time, error rates) to calibrate financial targets with executive sponsors before go-live.
+| Running Costs (Annual, Assumption) | Amount |
+|---|---|
+| LLM inference: ~75k documents × ~€0.05 (≈10k input + 3k output tokens on a mid-tier model) | ~€5k |
+| Cloud hosting: orchestrator, database, agents (EU region) | ~€25k |
+| Platform support: 1 FTE | ~€100k |
+| **Total running cost** | **~€130k** |
 
-### Core Pilot KPIs
-1. Quote turnaround cycle time (Hours → <15 Minutes)
-2. Touchless line-item extraction rate (Target: >80% without manual typing)
-3. Quote-to-order conversion rate (% lift on fast turnaround quotes)
-4. Order entry SKU/pricing error rate (Reduction toward zero)
-5. Inside sales employee net satisfaction (NPS & qualitative adoption)
+**Net annual value ≈ €570k** · **Pilot investment ≈ €140k (range €130–150k)** · **Payback ≈ 3 months after Denmark rollout**
 
-*Visual:* Water-fall ROI chart: Pilot Investment (€140k) vs. Annual Return (€646k direct labor + B2B revenue lift), highlighting the 3.8-month breakeven curve.
+*Note: Hours freed are capacity, not automatic headcount cuts. The value comes from sales reps handling more quotes and staff moving to customer-facing work.*
+
+### Upside Not Included in the Base Case
+- **Faster quotes, more won bids:** Industry sources consistently link response speed to win rate, but the published percentages are mostly vendor data. So we show sensitivity rather than a promise. *Illustration (assumptions: €2,500 average quote, 25% gross margin): every +1 percentage point in quote-to-order conversion on 75k quotes/year ≈ 750 extra orders ≈ **€470k gross margin**.*
+- **Fewer order-entry errors:** Manual order entry is commonly benchmarked at 1–3% errors (APQC, as widely cited). The target is to **halve** errors in the pilot, measured against the Week 1–2 baseline.
+
+### Core Pilot KPIs (Measured with 5–10 Pilot Users)
+1. Handling time per quote (baseline 12 min → target ≤4 min)
+2. Quote turnaround time (hours → <15 minutes for in-scope quotes)
+3. Touchless line rate (target ≥70% of lines need no manual correction)
+4. Order-entry error rate (target −50% vs. baseline)
+5. Quote-to-order conversion and pilot user satisfaction
+
+*The pilot validates **per-quote** savings with a small user group. The €570k figure is the Denmark-wide extrapolation and is recalculated at the Go/No-Go gate using measured values.*
+
+*Visual:* Simple bar chart: Pilot investment (€140k) vs. annual net value (€570k), with the revenue upside shown as a dashed bar labelled "not in base case".
 
 ---
 
@@ -310,7 +325,7 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 
 ## Slide 10 — Roadmap, governance & decision requested
 
-**Key message:** Proven accelerator deployed in weeks, first business value in ~10 weeks, multi-market scale in under a year—with a modular timeline and adaptable architecture ready to align with Company A's roadmap.
+**Key message:** Accelerator deployed in weeks, first live business value from Week 11, multi-market scale in under a year—with a modular timeline and adaptable architecture ready to align with Company A's roadmap.
 
 ### Indicative Pilot Roadmap (~12–14 Weeks · Adaptable Sizing)
 
@@ -318,7 +333,7 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 |---|---|---|---|
 | **Phase 1: Discover & Baseline** | Weeks 1–2 | • Measure baseline quote times & error rates<br>• Map ERP endpoints / UI screens & confirm tech stack<br>• Select 5–10 inside sales & store pilot users | Signed off baseline metrics & system connectivity verified |
 | **Phase 2: Accelerator Tailoring** | Weeks 3–6 | • Deploy Open Auto cloud orchestrator instance<br>• Configure initial tenant, RBAC & audit logging<br>• Install Bot Agents on pilot VMs/PCs | End-to-end telemetry & agent heartbeats verified |
-| **Phase 3: Bot Assembly & Testing** | Weeks 5–10 | • Assemble Bot A (Quotes) & Bot B (Shortages)<br>• Validate AI IDP extraction on 100 historical orders<br>• User acceptance testing in ERP sandbox | >95% extraction accuracy & zero unauthorized writes |
+| **Phase 3: Bot Assembly & Testing** | Weeks 5–10 | • Assemble Bot A (Quotes) & Bot B (Shortages)<br>• Validate AI IDP extraction on 100 historical orders<br>• User acceptance testing in ERP sandbox | ≥95% field extraction accuracy & zero unauthorized writes |
 | **Phase 4: Live Pilot & Measurement** | Weeks 11–14 | • Live production run with 5–10 pilot users<br>• Daily KPI tracking (time saved, errors, NPS)<br>• Calibrate business case for subsequent markets | **Gate Review:** Formal Go / No-Go decision to scale |
 | **Wave 2: Market 2 Expansion** | Months 4–7 | • Onboard secondary market tenant & local ERP adapter<br>• Deploy store operations bots (adapted from Bot B) | Store labor savings validated across retail network |
 | **Wave 3: Market 3 Expansion** | Months 7–11 | • Onboard tertiary market tenant & WMS/TMS adapters<br>• Delivery tracking & carrier exception bots | Customer delivery resolution times reduced |
@@ -330,7 +345,7 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 
 ### Validated Pilot Assumptions
 - Local ERP exposes REST/OData or SOAP endpoints; UI automation fallback (Playwright) available if specific screens lack APIs.
-- Contractor quote volume is ~300–400 requests/day in pilot market, primarily received via email attachments (PDF/Excel/Images).
+- Contractor quote volume is ~400 requests/day in the pilot market, ~75% received via email attachments (PDF/Excel/images). See assumptions A1–A7 on Slide 8.
 - Company A grants standard cloud hosting approval for EU-based, GDPR-compliant inference (cloud provider to be aligned during discovery).
 - 5–10 representative pilot users are allocated 2 hours/week for training, feedback, and baseline measurement.
 - **Timeline & Stack Flexibility:** The ~12–14 week timeline is an indicative benchmark with 2-week agile sprints, ready to be compressed or adjusted once the organizer's official schedule is announced. Tech stack is a planned baseline adaptable to Company A's ecosystem.
@@ -342,7 +357,7 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 > **Approve the Indicative Pilot Phase (~12–14 weeks, calibrated at kickoff | ~€130k–€150k investment):**
 > - **Weeks 1–2:** Measure operational baseline, confirm system access, and freeze final tech stack.
 > - **Weeks 3–10:** Tailor the Open Auto accelerator and configure Bot A (B2B Quotes) and Bot B (Store Shortages).
-> - **Weeks 11–14:** Execute live production pilot with 5–10 users to validate the **€646k/year** savings run-rate prior to regional rollout.
+> - **Weeks 11–14:** Run a live production pilot with 5–10 users to measure per-quote savings, then recalculate the **~€570k/year** Denmark net value before regional rollout.
 
 ---
 
@@ -351,7 +366,7 @@ Recommended Reference Stack (Flexible & Enterprise-Adaptable):
 *(Documenting resolution of consulting evaluation criteria & scenario planning)*
 
 1. **MVP Bot Pair Validation (Fast-to-Demo & Pragmatic):** Confirmed Bot A (B2B Quote Draft Generator) + Bot B (Morning Inventory Safety-Stock Alert). Both were intentionally chosen for the MVP because they are **fast to demo** (20–30 second visual before/after), **low in technical complexity** (read-only catalog lookups + draft PDF/Excel generation, zero risky ERP database writes), and prove both event-driven AI extraction and scheduled routine automation.
-2. **Benchmark Credibility:** Modeled handling times and error rates are directly calibrated against APQC & Gartner B2B benchmarks (10–15 min manual quote processing; 60–75% cycle time reduction via AI-assisted IDP; error reduction from 3% to <0.2%).
+2. **Benchmark Credibility:** The labour cost comes from Eurostat (Denmark €51.7/h, 2025). The manual order-entry error range (1–3%) is the APQC figure as widely cited. Handling times, volumes and conversion effects are explicit assumptions (A1–A7), to be measured in discovery. Revenue upside is shown as sensitivity, not in the base case.
 3. **Integration Feasibility:** Formally defined as "API-First, UI-Fallback". Leverages modern APIs where available, with native headless browser automation (Playwright/Selenium) as a proven fallback for legacy screens.
 4. **Presentation & Demo Strategy:** The 10-slide executive deck relies on a crisp 3-step visual storyboard (Prompt → Assembled Workflow → Generated Quote) on Slides 5 and 6, avoiding fragile live network demos during high-stakes board presentations.
 5. **Scenario Planning & Flexibility:** The 12–14 week pilot duration, the three-market sequence (DK → NO → SE), and the specific tech stack components represent a solid, defensible baseline plan. All elements are modular and will be formally tuned to organizer guidelines and Company A's enterprise IT standards during Phase 1 discovery.
